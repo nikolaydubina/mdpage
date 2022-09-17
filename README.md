@@ -8,8 +8,7 @@ This tool provides:
 * parametrization
 * separation of data definition (YAML) from data representation (Markdown)
 
-## Tests
 
-```go
-go run ../main.go -page page.yaml -config render_config.json > README.md
+```bash
+mdpage -page page.yaml -config render_config.json > README.md
 ```
