@@ -6,7 +6,7 @@ This tool provides:
 * consistency of formatting for large Markdown pages
 * automatic Markdown generation
 * parametrization
-* separation of data definition (YAML) from representation (Markdown)
+* separation of data definition (YAML) from data representation (Markdown)
 
 ## Tests
 
