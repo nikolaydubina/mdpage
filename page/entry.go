@@ -16,6 +16,7 @@ type Entry struct {
 	Source            string   `yaml:"source"`
 	ExampleImageURL   string   `yaml:"example_image_url"`
 	ExampleContentURL string   `yaml:"example_content_url"`
+	ExampleOutputURL  string   `yaml:"example_output_url"`
 	Requirements      []string `yaml:"requirements"`
 	Commands          []string `yaml:"commands"`
 }
@@ -67,8 +68,13 @@ func (v Group) Validate() error {
 	return multierr.Combine(errs...)
 }
 
+type Header struct {
+	ContentURL string `yaml:"content_url"`
+}
+
 // Page is full page contents.
 type Page struct {
+	Header Header  `yaml:"header"`
 	Groups []Group `yaml:"groups"`
 }
 

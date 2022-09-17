@@ -37,7 +37,10 @@ func main() {
 		log.Fatalf("invalid page: %s", err)
 	}
 
-	render := render.NewSimplePageRender("## Content")
+	render := render.NewSimplePageRender(render.SimplePageRenderConfig{
+		ContentTitle:    "## Content",
+		EntryLinkPrefix: "➡",
+	})
 
 	os.Stdout.WriteString(render.RenderPage(page))
 }
