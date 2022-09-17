@@ -11,8 +11,10 @@ import (
 )
 
 type SimplePageRenderConfig struct {
-	ContentTitle    string
-	EntryLinkPrefix string // e.g. "➡"️
+	ContentTitle      string `json:"content_title"`
+	RequirementsTitle string `json:"requirements_title"`
+	ExampleTitle      string `json:"example_title"`
+	EntryLinkPrefix   string `json:"entry_link_prefix"` // e.g. "➡"️
 }
 
 // TODO: grow capacity based on estimates
@@ -44,6 +46,7 @@ func (s SimplePageRender) RenderHeader(header page.Header) string {
 func (s SimplePageRender) RenderPageSummary(page page.Page) string {
 	var b strings.Builder
 
+	b.WriteString("## ")
 	b.WriteString(s.config.ContentTitle)
 	b.WriteRune('\n')
 	b.WriteRune('\n')
@@ -144,7 +147,7 @@ func (s SimplePageRender) RenderEntryContent(entry page.Entry) string {
 	}
 
 	if entry.ExampleOutputURL != "" {
-		b.WriteString("Example")
+		b.WriteString(s.config.ExampleTitle)
 		b.WriteRune('\n')
 		b.WriteString(renderContentFromFilePath(entry.ExampleOutputURL))
 		b.WriteRune('\n')
@@ -158,7 +161,7 @@ func (s SimplePageRender) RenderEntryContent(entry page.Entry) string {
 
 	// requirements
 	if len(entry.Requirements) > 0 {
-		b.WriteString("Requirements")
+		b.WriteString(s.config.RequirementsTitle)
 		b.WriteRune('\n')
 		b.WriteString("```\n")
 

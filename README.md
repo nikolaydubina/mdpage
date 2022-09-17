@@ -11,5 +11,5 @@ This tool provides:
 ## Tests
 
 ```go
-go run ../main.go -page page.yaml > README.md
+go run ../main.go -page page.yaml -config render_config.json > README.md
 ```
