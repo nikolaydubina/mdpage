@@ -91,10 +91,6 @@ func (s SimplePageRender) RenderGroupContent(group page.Group) string {
 	return b.String()
 }
 
-/*
-ExampleContentURL string   `yaml:"example_content_url"`
-*/
-
 func (s SimplePageRender) RenderEntryContent(entry page.Entry) string {
 	var b strings.Builder
 
