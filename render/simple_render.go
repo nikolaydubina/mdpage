@@ -1,182 +1,165 @@
 package render
 
 import (
-	"io"
-	"log"
-	"os"
 	"strings"
 	"unicode"
 
 	"github.com/nikolaydubina/mdpage/page"
 )
 
-type SimplePageRenderConfig struct {
-	ContentTitle      string `json:"content_title"`
-	RequirementsTitle string `json:"requirements_title"`
-	ExampleTitle      string `json:"example_title"`
-	EntryLinkPrefix   string `json:"entry_link_prefix"` // e.g. "➡"️
-}
-
-// TODO: grow capacity based on estimates
 type SimplePageRender struct {
-	config SimplePageRenderConfig
+	b strings.Builder
 }
 
-func NewSimplePageRender(config SimplePageRenderConfig) SimplePageRender {
-	return SimplePageRender{config: config}
+func NewSimplePageRender() *SimplePageRender { return &SimplePageRender{} }
+
+func (s SimplePageRender) estimatePageSize(page page.Page) int {
+	c := 0
+	c += 1000 // header
+	for _, q := range page.Groups {
+		c += len(q.Entries) * 1000
+	}
+	return c
 }
 
-func (s SimplePageRender) RenderPage(page page.Page) string {
-	var b strings.Builder
-	b.WriteString(s.RenderHeader(page.Header))
-	b.WriteRune('\n')
-	b.WriteString(s.RenderPageSummary(page))
-	b.WriteRune('\n')
-	b.WriteString(s.RenderPageContent(page))
-	b.WriteRune('\n')
-	return b.String()
+func (s *SimplePageRender) RenderPage(page page.Page) string {
+	s.b.Reset()
+	s.b.Grow(s.estimatePageSize(page))
+
+	s.RenderHeader(page.Header)
+	s.b.WriteRune('\n')
+	s.RenderPageSummary(page)
+	s.b.WriteRune('\n')
+	s.RenderPageContent(page)
+	s.b.WriteRune('\n')
+	return s.b.String()
 }
 
-func (s SimplePageRender) RenderHeader(header page.Header) string {
-	var b strings.Builder
-	b.WriteString(getFileContent(header.ContentURL))
-	return b.String()
+func (s *SimplePageRender) RenderHeader(header page.Header) {
+	s.b.WriteString(getFileContent(header.ContentURL))
 }
 
-func (s SimplePageRender) RenderPageSummary(page page.Page) string {
-	var b strings.Builder
-
-	b.WriteString("## ")
-	b.WriteString(s.config.ContentTitle)
-	b.WriteRune('\n')
-	b.WriteRune('\n')
+func (s *SimplePageRender) RenderPageSummary(page page.Page) {
+	s.b.WriteString("## ")
+	s.b.WriteString(page.Contents.Title)
+	s.b.WriteRune('\n')
+	s.b.WriteRune('\n')
 
 	entryPrefix := "   "
 	for _, group := range page.Groups {
-		b.WriteString(" - " + group.Title)
-		b.WriteRune('\n')
+		s.b.WriteString(" - " + group.Title)
+		s.b.WriteRune('\n')
 		for _, entry := range group.Entries {
-			b.WriteString(entryPrefix + "+ " + s.RenderSummaryEntry(entry))
-			b.WriteRune('\n')
+			s.b.WriteString(entryPrefix + "+ " + s.RenderSummaryEntry(entry, page.EntryConfig))
+			s.b.WriteRune('\n')
 		}
 	}
-
-	return b.String()
 }
 
-func (s SimplePageRender) RenderSummaryEntry(entry page.Entry) string {
-	return "[" + s.config.EntryLinkPrefix + " " + entry.Title + "](" + makeMarkdownTitleLink(entry.Title) + ")"
+func (s *SimplePageRender) RenderSummaryEntry(entry page.Entry, config page.EntryConfig) string {
+	return "[" + config.TitlePrefix + " " + entry.Title + "](" + makeMarkdownTitleLink(entry.Title) + ")"
 }
 
-func (s SimplePageRender) RenderPageContent(page page.Page) string {
-	var b strings.Builder
+func (s *SimplePageRender) RenderPageContent(page page.Page) {
 	for _, group := range page.Groups {
-		b.WriteString(s.RenderGroupContent(group))
+		s.RenderGroupContent(group, page.EntryConfig)
 	}
-	return b.String()
 }
 
-func (s SimplePageRender) RenderGroupContent(group page.Group) string {
-	var b strings.Builder
-
-	b.WriteString("## ")
-	b.WriteString(group.Title)
-	b.WriteRune('\n')
-	b.WriteRune('\n')
+func (s *SimplePageRender) RenderGroupContent(group page.Group, config page.EntryConfig) {
+	s.b.WriteString("## ")
+	s.b.WriteString(group.Title)
+	s.b.WriteRune('\n')
+	s.b.WriteRune('\n')
 
 	for _, q := range group.Entries {
-		b.WriteString(s.RenderEntryContent(q))
+		s.RenderEntryContent(q, config)
 	}
-
-	return b.String()
 }
 
-func (s SimplePageRender) RenderEntryContent(entry page.Entry) string {
-	var b strings.Builder
-
+func (s *SimplePageRender) RenderEntryContent(entry page.Entry, config page.EntryConfig) {
 	// title
-	b.WriteString("### ")
-	b.WriteString(s.config.EntryLinkPrefix)
-	b.WriteRune(' ')
-	b.WriteString(entry.Title)
-	b.WriteRune('\n')
-	b.WriteRune('\n')
+	s.b.WriteString("### ")
+	s.b.WriteString(config.TitlePrefix)
+	s.b.WriteRune(' ')
+	s.b.WriteString(entry.Title)
+	s.b.WriteRune('\n')
+	s.b.WriteRune('\n')
 
 	// description
-	b.WriteString(entry.Description)
+	s.b.WriteString(entry.Description)
 
 	// description: author
 	if len(entry.Author) > 0 {
-		b.WriteString(" — ")
-		b.WriteString(entry.Author)
+		s.b.WriteString(" — ")
+		s.b.WriteString(entry.Author)
 	}
 
 	// description: source
 	if len(entry.Source) > 0 {
-		b.WriteString(" / ")
-		b.WriteString(entry.Source)
+		s.b.WriteString(" / ")
+		s.b.WriteString(entry.Source)
 	}
 
 	// description: end
-	b.WriteRune('\n')
-	b.WriteRune('\n')
+	s.b.WriteRune('\n')
+	s.b.WriteRune('\n')
 
 	// commands
 	if len(entry.Commands) > 0 {
-		b.WriteRune('\n')
-		b.WriteString("```\n")
+		s.b.WriteRune('\n')
+		s.b.WriteString("```\n")
 
 		for _, q := range entry.Commands {
-			b.WriteString(q)
-			b.WriteRune('\n')
+			s.b.WriteString(q)
+			s.b.WriteRune('\n')
 		}
 
-		b.WriteString("```")
-		b.WriteRune('\n')
-		b.WriteRune('\n')
+		s.b.WriteString("```")
+		s.b.WriteRune('\n')
+		s.b.WriteRune('\n')
 	}
 
 	// TODO: try fetch from HTTP too
 	if entry.ExampleContentURL != "" {
-		b.WriteString(renderContentFromFilePath(entry.ExampleContentURL))
-		b.WriteRune('\n')
+		s.b.WriteString(renderContentFromFilePath(entry.ExampleContentURL))
+		s.b.WriteRune('\n')
 	}
 
 	if entry.ExampleOutputURL != "" {
-		b.WriteString(s.config.ExampleTitle)
-		b.WriteRune('\n')
-		b.WriteString(renderContentFromFilePath(entry.ExampleOutputURL))
-		b.WriteRune('\n')
+		s.b.WriteString(config.Example.Title)
+		s.b.WriteRune('\n')
+		s.b.WriteString(renderContentFromFilePath(entry.ExampleOutputURL))
+		s.b.WriteRune('\n')
 	}
 
 	if entry.ExampleImageURL != "" {
-		b.WriteString(renderExampleImage(entry.ExampleImageURL))
-		b.WriteRune('\n')
-		b.WriteRune('\n')
+		s.b.WriteString(renderExampleImage(entry.ExampleImageURL))
+		s.b.WriteRune('\n')
+		s.b.WriteRune('\n')
 	}
 
 	// requirements
 	if len(entry.Requirements) > 0 {
-		b.WriteString(s.config.RequirementsTitle)
-		b.WriteRune('\n')
-		b.WriteString("```\n")
+		s.b.WriteString(config.Requirements.Title)
+		s.b.WriteRune('\n')
+		s.b.WriteString("```\n")
 
 		for _, q := range entry.Requirements {
-			b.WriteString(q)
-			b.WriteRune('\n')
+			s.b.WriteString(q)
+			s.b.WriteRune('\n')
 		}
 
-		b.WriteString("```")
-		b.WriteRune('\n')
+		s.b.WriteString("```")
+		s.b.WriteRune('\n')
 	}
 
-	b.WriteRune('\n')
-
-	return b.String()
+	s.b.WriteRune('\n')
 }
 
 func renderExampleImage(imageURL string) string {
 	var b strings.Builder
+	b.Grow(1000)
 	b.WriteString(`<div align="center">`)
 	b.WriteString(`<img src="`)
 	b.WriteString(imageURL)
@@ -200,37 +183,4 @@ func makeMarkdownTitleLink(s string) string {
 	}
 
 	return "#-" + f.String()
-}
-
-// getFileContent unmodified bytes of file as is
-func getFileContent(filePath string) string {
-	f, err := os.Open(filePath)
-	if err != nil {
-		log.Fatalf("can not open file: %s", err)
-	}
-	s, err := io.ReadAll(f)
-	if err != nil {
-		log.Fatalf("can not read: %s", err)
-	}
-	return string(s)
-}
-
-// renderContentFromFilePath for local files
-func renderContentFromFilePath(filePath string) string {
-	var b strings.Builder
-
-	b.WriteString("```")
-	// markdown syntax
-	if strings.HasSuffix(filePath, ".go") {
-		b.WriteString("go")
-	}
-	b.WriteRune('\n')
-
-	b.WriteString(getFileContent(filePath))
-
-	b.WriteRune('\n')
-	b.WriteString("```")
-	b.WriteRune('\n')
-
-	return b.String()
 }

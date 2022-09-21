@@ -72,10 +72,30 @@ type Header struct {
 	ContentURL string `yaml:"content_url"`
 }
 
+type ContentsConfig struct {
+	Title string `yaml:"title"`
+}
+
+type EntryRequirementsConfig struct {
+	Title string `yaml:"title"`
+}
+
+type EntryExampleConfig struct {
+	Title string `yaml:"title"`
+}
+
+type EntryConfig struct {
+	TitlePrefix  string                  `yaml:"title_prefix"`
+	Requirements EntryRequirementsConfig `yaml:"requirements"`
+	Example      EntryExampleConfig      `yaml:"example"`
+}
+
 // Page is full page contents.
 type Page struct {
-	Header Header  `yaml:"header"`
-	Groups []Group `yaml:"groups"`
+	Header      Header         `yaml:"header"`
+	Groups      []Group        `yaml:"groups"`
+	Contents    ContentsConfig `yaml:"contents"`
+	EntryConfig EntryConfig    `yaml:"entry"`
 }
 
 func (v Page) Validate() error {
