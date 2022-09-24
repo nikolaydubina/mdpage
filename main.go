@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"io"
 	"log"
 	"os"
 
@@ -13,10 +14,12 @@ import (
 
 func main() {
 	var (
-		pageFilePath string
+		pageFilePath   string
+		outputFilePath string
 	)
 
 	flag.StringVar(&pageFilePath, "page", "", "path to page file")
+	flag.StringVar(&outputFilePath, "o", "", "path to output")
 	flag.Parse()
 
 	if pageFilePath == "" {
@@ -40,5 +43,15 @@ func main() {
 	render := render.SimplePageRender{
 		AuthorRenderer: render.GitHubAuthorRenderer{Prefix: "@"},
 	}
-	os.Stdout.WriteString(render.RenderPage(page))
+
+	var out io.StringWriter = os.Stdout
+
+	if outputFilePath != "" {
+		out, err = os.Create(outputFilePath)
+		if err != nil {
+			log.Fatalf("can not open file(%s): %s", outputFilePath, err)
+		}
+	}
+
+	out.WriteString(render.RenderPage(page))
 }
