@@ -9,9 +9,9 @@ import (
 
 type SimplePageRender struct {
 	b strings.Builder
-}
 
-func NewSimplePageRender() *SimplePageRender { return &SimplePageRender{} }
+	AuthorRenderer interface{ Render(s string) string }
+}
 
 func (s SimplePageRender) estimatePageSize(page page.Page) int {
 	c := 0
@@ -92,7 +92,7 @@ func (s *SimplePageRender) RenderEntryContent(entry page.Entry, config page.Entr
 	// description: author
 	if len(entry.Author) > 0 {
 		s.b.WriteString(" — ")
-		s.b.WriteString(entry.Author)
+		s.b.WriteString(s.AuthorRenderer.Render(entry.Author))
 	}
 
 	// description: source

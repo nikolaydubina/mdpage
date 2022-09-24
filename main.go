@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "embed"
 	"flag"
 	"log"
 	"os"
@@ -38,6 +37,8 @@ func main() {
 		log.Fatalf("invalid page: %s", err)
 	}
 
-	render := render.NewSimplePageRender()
+	render := render.SimplePageRender{
+		AuthorRenderer: render.GitHubAuthorRenderer{Prefix: "@"},
+	}
 	os.Stdout.WriteString(render.RenderPage(page))
 }
