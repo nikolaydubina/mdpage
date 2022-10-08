@@ -91,7 +91,8 @@ func (s *SimplePageRender) RenderEntryContent(entry page.Entry, config page.Entr
 	// title
 	s.b.WriteString("### ")
 	if config.Back != "" {
-		v := PageLink{Name: config.Back, URL: makeMarkdownTitleLink(configContent.Title)}
+		url := strings.ReplaceAll(strings.ToLower(strings.TrimSpace(configContent.Title)), " ", "-")
+		v := PageLink{Name: config.Back, URL: url}
 		v.Render(&s.b)
 	}
 	s.b.WriteString(config.TitlePrefix)
