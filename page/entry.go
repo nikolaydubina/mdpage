@@ -86,6 +86,7 @@ type EntryExampleConfig struct {
 
 type EntryConfig struct {
 	TitlePrefix  string                  `yaml:"title_prefix"`
+	Back         string                  `yaml:"back"`
 	Requirements EntryRequirementsConfig `yaml:"requirements"`
 	Example      EntryExampleConfig      `yaml:"example"`
 }

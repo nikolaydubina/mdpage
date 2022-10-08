@@ -62,24 +62,38 @@ func (s *SimplePageRender) RenderSummaryEntry(entry page.Entry, config page.Entr
 
 func (s *SimplePageRender) RenderPageContent(page page.Page) {
 	for _, group := range page.Groups {
-		s.RenderGroupContent(group, page.EntryConfig)
+		s.RenderGroupContent(group, page.EntryConfig, page.Contents)
 	}
 }
 
-func (s *SimplePageRender) RenderGroupContent(group page.Group, config page.EntryConfig) {
+func (s *SimplePageRender) RenderGroupContent(group page.Group, config page.EntryConfig, configContent page.ContentsConfig) {
 	s.b.WriteString("## ")
 	s.b.WriteString(group.Title)
 	s.b.WriteRune('\n')
 	s.b.WriteRune('\n')
 
 	for _, q := range group.Entries {
-		s.RenderEntryContent(q, config)
+		s.RenderEntryContent(q, config, configContent)
 	}
 }
 
-func (s *SimplePageRender) RenderEntryContent(entry page.Entry, config page.EntryConfig) {
+type PageLink struct {
+	Name string
+	URL  string
+}
+
+func (v PageLink) Render(b *strings.Builder) {
+	b.WriteString("[" + v.Name + "]")
+	b.WriteString("(" + v.URL + ")")
+}
+
+func (s *SimplePageRender) RenderEntryContent(entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
 	// title
 	s.b.WriteString("### ")
+	if config.Back != "" {
+		v := PageLink{Name: config.Back, URL: makeMarkdownTitleLink(configContent.Title)}
+		v.Render(&s.b)
+	}
 	s.b.WriteString(config.TitlePrefix)
 	s.b.WriteRune(' ')
 	s.b.WriteString(entry.Title)
