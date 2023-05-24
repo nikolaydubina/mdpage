@@ -8,7 +8,8 @@ import (
 // Entry in page containing single post.
 type Entry struct {
 	Title             string   `yaml:"title"`
-	URL               string   `yaml:"url"` // for md-list group entries only
+	Name              string   `yaml:"name"`
+	URL               string   `yaml:"url"`
 	Description       string   `yaml:"description"`
 	Author            string   `yaml:"author"`
 	Source            string   `yaml:"source"`

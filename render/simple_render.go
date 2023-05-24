@@ -81,22 +81,12 @@ func (s SimplePageRender) RenderMarkdownListGroupEntryContent(out io.StringWrite
 	out.WriteString("\n")
 }
 
-type PageLink struct {
-	Name string
-	URL  string
-}
-
-func (v PageLink) RenderTo(out io.StringWriter) {
-	out.WriteString("[" + v.Name + "]")
-	out.WriteString("(" + v.URL + ")")
-}
-
 func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
 	// title
 	out.WriteString("### ")
 	if config.Back != "" {
 		url := "#" + strings.ReplaceAll(strings.ToLower(strings.TrimSpace(configContent.Title)), " ", "-")
-		v := PageLink{Name: config.Back, URL: url}
+		v := Link{Name: config.Back, URL: url}
 		v.RenderTo(out)
 	}
 	out.WriteString(config.TitlePrefix)
