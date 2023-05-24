@@ -22,7 +22,7 @@ func (s SimplePageRender) estimatePageSize(page page.Page) int {
 	return c
 }
 
-func (s *SimplePageRender) RenderPage(page page.Page) string {
+func (s SimplePageRender) RenderPage(page page.Page) string {
 	s.b.Reset()
 	s.b.Grow(s.estimatePageSize(page))
 
@@ -35,11 +35,9 @@ func (s *SimplePageRender) RenderPage(page page.Page) string {
 	return s.b.String()
 }
 
-func (s *SimplePageRender) RenderHeader(header page.Header) {
-	s.b.WriteString(getFileContent(header.ContentURL))
-}
+func (s SimplePageRender) RenderHeader(header string) { s.b.WriteString(header) }
 
-func (s *SimplePageRender) RenderPageSummary(page page.Page) {
+func (s SimplePageRender) RenderPageSummary(page page.Page) {
 	s.b.WriteString("## ")
 	s.b.WriteString(page.Contents.Title)
 	s.b.WriteRune('\n')
@@ -56,17 +54,17 @@ func (s *SimplePageRender) RenderPageSummary(page page.Page) {
 	}
 }
 
-func (s *SimplePageRender) RenderSummaryEntry(entry page.Entry, config page.EntryConfig) string {
+func (s SimplePageRender) RenderSummaryEntry(entry page.Entry, config page.EntryConfig) string {
 	return "[" + config.TitlePrefix + " " + entry.Title + "](" + makeMarkdownTitleLink(entry.Title) + ")"
 }
 
-func (s *SimplePageRender) RenderPageContent(page page.Page) {
+func (s SimplePageRender) RenderPageContent(page page.Page) {
 	for _, group := range page.Groups {
 		s.RenderGroupContent(group, page.EntryConfig, page.Contents)
 	}
 }
 
-func (s *SimplePageRender) RenderGroupContent(group page.Group, config page.EntryConfig, configContent page.ContentsConfig) {
+func (s SimplePageRender) RenderGroupContent(group page.Group, config page.EntryConfig, configContent page.ContentsConfig) {
 	s.b.WriteString("## ")
 	s.b.WriteString(group.Title)
 	s.b.WriteRune('\n')
@@ -87,7 +85,7 @@ func (v PageLink) Render(b *strings.Builder) {
 	b.WriteString("(" + v.URL + ")")
 }
 
-func (s *SimplePageRender) RenderEntryContent(entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
+func (s SimplePageRender) RenderEntryContent(entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
 	// title
 	s.b.WriteString("### ")
 	if config.Back != "" {
