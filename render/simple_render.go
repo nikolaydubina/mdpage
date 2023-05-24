@@ -141,16 +141,25 @@ func (s SimplePageRender) RenderEntryContent(entry page.Entry, config page.Entry
 		s.b.WriteRune('\n')
 	}
 
-	// TODO: try fetch from HTTP too
-	if entry.ExampleContentURL != "" {
-		s.b.WriteString(renderContentFromFilePath(entry.ExampleContentURL))
+	if entry.ExampleContent != "" {
+		s.b.WriteString("```")
+		if entry.ExampleContentExt != "" {
+			s.b.WriteString(entry.ExampleContentExt)
+		}
+		s.b.WriteRune('\n')
+		s.b.WriteString(entry.ExampleContent)
+		s.b.WriteString("```")
+		s.b.WriteRune('\n')
 		s.b.WriteRune('\n')
 	}
 
-	if entry.ExampleOutputURL != "" {
+	if entry.ExampleOutput != "" {
 		s.b.WriteString(config.Example.Title)
 		s.b.WriteRune('\n')
-		s.b.WriteString(renderContentFromFilePath(entry.ExampleOutputURL))
+		s.b.WriteString("```\n")
+		s.b.WriteString(entry.ExampleOutput)
+		s.b.WriteString("```")
+		s.b.WriteRune('\n')
 		s.b.WriteRune('\n')
 	}
 

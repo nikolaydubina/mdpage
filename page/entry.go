@@ -15,6 +15,7 @@ type Entry struct {
 	ExampleContentURL string   `yaml:"example_content_url"`
 	ExampleOutputURL  string   `yaml:"example_output_url"`
 	ExampleContent    string   `yaml:"example_content"`
+	ExampleContentExt string   `yaml:"example_content_ext"`
 	ExampleOutput     string   `yaml:"example_output"`
 	Requirements      []string `yaml:"requirements"`
 	Commands          []string `yaml:"commands"`
