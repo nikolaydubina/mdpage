@@ -40,9 +40,9 @@ func main() {
 		log.Fatalf("invalid page: %s", err)
 	}
 
-	render := render.SimplePageRender{
-		AuthorRenderer: render.GitHubAuthorRenderer{Prefix: "@"},
-	}
+	render := render.NewSimplePageRender(
+		render.GitHubAuthorRenderer{Prefix: "@"},
+	)
 
 	var out io.StringWriter = os.Stdout
 

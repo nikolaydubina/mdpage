@@ -7,10 +7,18 @@ import (
 	"github.com/nikolaydubina/mdpage/page"
 )
 
-type SimplePageRender struct {
-	b strings.Builder
+type AuthorRenderer interface{ Render(s string) string }
 
-	AuthorRenderer interface{ Render(s string) string }
+type SimplePageRender struct {
+	b              *strings.Builder
+	authorRenderer AuthorRenderer
+}
+
+func NewSimplePageRender(authorRenderer AuthorRenderer) SimplePageRender {
+	return SimplePageRender{
+		b:              &strings.Builder{},
+		authorRenderer: authorRenderer,
+	}
 }
 
 func (s SimplePageRender) estimatePageSize(page page.Page) int {
@@ -91,7 +99,7 @@ func (s SimplePageRender) RenderEntryContent(entry page.Entry, config page.Entry
 	if config.Back != "" {
 		url := "#" + strings.ReplaceAll(strings.ToLower(strings.TrimSpace(configContent.Title)), " ", "-")
 		v := PageLink{Name: config.Back, URL: url}
-		v.Render(&s.b)
+		v.Render(s.b)
 	}
 	s.b.WriteString(config.TitlePrefix)
 	s.b.WriteRune(' ')
@@ -105,7 +113,7 @@ func (s SimplePageRender) RenderEntryContent(entry page.Entry, config page.Entry
 	// description: author
 	if len(entry.Author) > 0 {
 		s.b.WriteString(" — ")
-		s.b.WriteString(s.AuthorRenderer.Render(entry.Author))
+		s.b.WriteString(s.authorRenderer.Render(entry.Author))
 	}
 
 	// description: source
