@@ -8,9 +8,16 @@ import (
 
 // Group is named ordered collection of Entries.
 type Group struct {
-	Title   string  `yaml:"title"`
-	Entries []Entry `yaml:"entries"`
+	Title   string    `yaml:"title"`
+	Type    GroupType `yaml:"type"`
+	Entries []Entry   `yaml:"entries"`
 }
+
+type GroupType string
+
+const (
+	MarkdownListGroupType GroupType = "md-list"
+)
 
 var (
 	ErrTitleIsEmpty                    = errors.New("title is empty")

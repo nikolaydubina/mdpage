@@ -8,6 +8,7 @@ import (
 // Entry in page containing single post.
 type Entry struct {
 	Title             string   `yaml:"title"`
+	URL               string   `yaml:"url"` // for md-list group entries only
 	Description       string   `yaml:"description"`
 	Author            string   `yaml:"author"`
 	Source            string   `yaml:"source"`
@@ -33,7 +34,7 @@ func (v Entry) Validate() error {
 	if strings.HasSuffix(v.Title, ".") {
 		return ErrInvalidEntryTitleEndsWithPeriod
 	}
-	if !strings.HasSuffix(v.Description, ".") {
+	if len(v.Description) > 0 && !strings.HasSuffix(v.Description, ".") {
 		return ErrInvalidEntryDescriptionEndsWithoutPeriod
 	}
 	return nil

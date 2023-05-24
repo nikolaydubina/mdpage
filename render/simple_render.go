@@ -65,8 +65,20 @@ func (s SimplePageRender) RenderGroupContent(out io.StringWriter, group page.Gro
 	out.WriteString("\n")
 
 	for _, q := range group.Entries {
+		if group.Type == page.MarkdownListGroupType {
+			s.RenderMarkdownListGroupEntryContent(out, q, config, configContent)
+			continue
+		}
+
 		s.RenderEntryContent(out, q, config, configContent)
 	}
+}
+
+func (s SimplePageRender) RenderMarkdownListGroupEntryContent(out io.StringWriter, entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
+	out.WriteString("- ")
+	out.WriteString("[" + entry.Title + "](" + entry.URL + ")")
+	out.WriteString("\n")
+	out.WriteString("\n")
 }
 
 type PageLink struct {
