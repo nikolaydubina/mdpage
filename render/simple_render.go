@@ -150,7 +150,7 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 	}
 
 	if entry.ExampleImageURL != "" {
-		out.WriteString(renderExampleImage(entry.ExampleImageURL))
+		Image{ImageURL: entry.ExampleImageURL}.RenderTo(out)
 		out.WriteString("\n")
 		out.WriteString("\n")
 	}
@@ -171,18 +171,6 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 	}
 
 	out.WriteString("\n")
-}
-
-func renderExampleImage(imageURL string) string {
-	var b strings.Builder
-	b.Grow(1000)
-	b.WriteString(`<div align="center">`)
-	b.WriteString(`<img src="`)
-	b.WriteString(imageURL)
-	b.WriteString(`" style="margin: 8px; max-height: 640px;">`)
-	b.WriteString(`</div>`)
-	b.WriteString("\n")
-	return b.String()
 }
 
 // makeMarkdownTitleLink produces name that can be used to reference Markdown section for entry
