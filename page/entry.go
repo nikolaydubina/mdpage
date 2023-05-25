@@ -12,7 +12,6 @@ type Entry struct {
 	URL               string   `yaml:"url"`
 	Description       string   `yaml:"description"`
 	Author            string   `yaml:"author"`
-	Source            string   `yaml:"source"`
 	ExampleImageURL   string   `yaml:"example_image_url"`
 	ExampleContent    string   `yaml:"example_content"`
 	ExampleContentExt string   `yaml:"example_content_ext"`

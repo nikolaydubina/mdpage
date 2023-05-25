@@ -30,25 +30,32 @@ func (s SimplePageRender) RenderTo(out io.StringWriter, page page.Page) {
 
 func (s SimplePageRender) RenderHeader(out io.StringWriter, header string) { out.WriteString(header) }
 
-func (s SimplePageRender) RenderPageSummary(out io.StringWriter, page page.Page) {
+func (s SimplePageRender) RenderPageSummary(out io.StringWriter, p page.Page) {
 	out.WriteString("## ")
-	out.WriteString(page.Contents.Title)
-	out.WriteString("\n")
-	out.WriteString("\n")
+	out.WriteString(p.Contents.Title)
+	out.WriteString("\n\n")
 
 	entryPrefix := "   "
-	for _, group := range page.Groups {
+	for _, group := range p.Groups {
 		out.WriteString(" - " + group.Title)
 		out.WriteString("\n")
 		for _, entry := range group.Entries {
-			out.WriteString(entryPrefix + "+ " + RenderSummaryEntry(out, entry, page.EntryConfig))
+			if group.Type == page.MarkdownListGroupType {
+				out.WriteString(entryPrefix + "+ " + Link{Name: p.EntryConfig.TitlePrefix + " " + entry.Title, URL: RelativeLink(group.Title)}.Render())
+				out.WriteString("\n")
+				continue
+			}
+
+			out.WriteString(entryPrefix + "+ " + RenderSummaryEntry(out, entry, p.EntryConfig))
 			out.WriteString("\n")
 		}
 	}
 }
 
 func RenderSummaryEntry(out io.StringWriter, entry page.Entry, config page.EntryConfig) string {
-	return "[" + config.TitlePrefix + " " + entry.Title + "](" + makeMarkdownTitleLink(entry.Title) + ")"
+	title := EnrichedTitleWithProjectNameLinkTextSummary(entry)
+	titleEntry := EnrichedTitleWithProjectNameLinkText(entry) // special version to avoid url
+	return "[" + config.TitlePrefix + " " + title + "](" + makeMarkdownTitleLink(titleEntry) + ")"
 }
 
 func (s SimplePageRender) RenderPageContent(out io.StringWriter, page page.Page) {
@@ -60,15 +67,13 @@ func (s SimplePageRender) RenderPageContent(out io.StringWriter, page page.Page)
 func (s SimplePageRender) RenderGroupContent(out io.StringWriter, group page.Group, config page.EntryConfig, configContent page.ContentsConfig) {
 	out.WriteString("## ")
 	out.WriteString(group.Title)
-	out.WriteString("\n")
-	out.WriteString("\n")
+	out.WriteString("\n\n")
 
 	for _, q := range group.Entries {
 		if group.Type == page.MarkdownListGroupType {
 			s.RenderMarkdownListGroupEntryContent(out, q, config, configContent)
 			continue
 		}
-
 		s.RenderEntryContent(out, q, config, configContent)
 	}
 }
@@ -76,25 +81,25 @@ func (s SimplePageRender) RenderGroupContent(out io.StringWriter, group page.Gro
 func (s SimplePageRender) RenderMarkdownListGroupEntryContent(out io.StringWriter, entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
 	out.WriteString("- ")
 	out.WriteString("[" + entry.Title + "](" + entry.URL + ")")
-	out.WriteString("\n")
-	out.WriteString("\n")
+	out.WriteString("\n\n")
+}
+
+func RelativeLink(configTitle string) string {
+	return "#" + strings.ReplaceAll(strings.ToLower(strings.TrimSpace(configTitle)), " ", "-")
 }
 
 func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Entry, config page.EntryConfig, configContent page.ContentsConfig) {
 	// title
 	out.WriteString("### ")
 	if config.Back != "" {
-		url := "#" + strings.ReplaceAll(strings.ToLower(strings.TrimSpace(configContent.Title)), " ", "-")
-		v := Link{Name: config.Back, URL: url}
+		v := Link{Name: config.Back, URL: RelativeLink(configContent.Title)}
 		v.RenderTo(out)
 	}
 	out.WriteString(config.TitlePrefix)
 	out.WriteString(" ")
-	out.WriteString(entry.Title)
-	out.WriteString("\n")
-	out.WriteString("\n")
+	out.WriteString(EnrichedTitleWithProjectNameLink(entry))
+	out.WriteString("\n\n")
 
-	// description
 	out.WriteString(entry.Description)
 
 	// description: author
@@ -103,17 +108,9 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 		out.WriteString(s.authorRenderer.Render(entry.Author))
 	}
 
-	// description: source
-	if len(entry.Source) > 0 {
-		out.WriteString(" / ")
-		out.WriteString(entry.Source)
-	}
-
 	// description: end
-	out.WriteString("\n")
-	out.WriteString("\n")
+	out.WriteString("\n\n")
 
-	// commands
 	if len(entry.Commands) > 0 {
 		out.WriteString("\n")
 		out.WriteString("```\n")
@@ -124,8 +121,7 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 		}
 
 		out.WriteString("```")
-		out.WriteString("\n")
-		out.WriteString("\n")
+		out.WriteString("\n\n")
 	}
 
 	if entry.ExampleContent != "" {
@@ -136,8 +132,7 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 		out.WriteString("\n")
 		out.WriteString(entry.ExampleContent)
 		out.WriteString("```")
-		out.WriteString("\n")
-		out.WriteString("\n")
+		out.WriteString("\n\n")
 	}
 
 	if entry.ExampleOutput != "" {
@@ -146,17 +141,14 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 		out.WriteString("```\n")
 		out.WriteString(entry.ExampleOutput)
 		out.WriteString("```")
-		out.WriteString("\n")
-		out.WriteString("\n")
+		out.WriteString("\n\n")
 	}
 
 	if entry.ExampleImageURL != "" {
 		Image{ImageURL: entry.ExampleImageURL}.RenderTo(out)
-		out.WriteString("\n")
-		out.WriteString("\n")
+		out.WriteString("\n\n")
 	}
 
-	// requirements
 	if len(entry.Requirements) > 0 {
 		out.WriteString(config.Requirements.Title)
 		out.WriteString("\n")

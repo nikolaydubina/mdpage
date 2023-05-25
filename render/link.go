@@ -11,6 +11,12 @@ type Link struct {
 	URL  string
 }
 
+func (v Link) Render() string {
+	b := strings.Builder{}
+	v.RenderTo(&b)
+	return b.String()
+}
+
 func (v Link) RenderTo(out io.StringWriter) {
 	out.WriteString("[" + v.Name + "]")
 	out.WriteString("(" + v.URL + ")")
