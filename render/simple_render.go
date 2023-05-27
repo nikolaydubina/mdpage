@@ -75,6 +75,7 @@ func (s SimplePageRender) RenderGroupContent(out io.StringWriter, group page.Gro
 			continue
 		}
 		s.RenderEntryContent(out, q, config, configContent)
+		out.WriteString("\n")
 	}
 }
 
@@ -100,15 +101,12 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 	out.WriteString(EnrichedTitleWithProjectNameLink(entry))
 	out.WriteString("\n\n")
 
+	// description
 	out.WriteString(entry.Description)
-
-	// description: author
 	if len(entry.Author) > 0 {
 		out.WriteString(" — ")
 		out.WriteString(s.authorRenderer.Render(entry.Author))
 	}
-
-	// description: end
 	out.WriteString("\n\n")
 
 	if len(entry.Commands) > 0 {
@@ -162,6 +160,4 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 		out.WriteString("```")
 		out.WriteString("\n")
 	}
-
-	out.WriteString("\n")
 }
