@@ -30,7 +30,7 @@ func makeMarkdownTitleLink(s string) string {
 	var f strings.Builder
 	f.Grow(len(t))
 	for _, q := range t {
-		if unicode.IsLetter(q) || unicode.IsDigit(q) || q == '-' {
+		if unicode.IsLetter(q) || unicode.IsDigit(q) || q == '-' || q == '_' {
 			f.WriteRune(q)
 		}
 	}
