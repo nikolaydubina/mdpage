@@ -147,6 +147,11 @@ func (s SimplePageRender) RenderEntryContent(out io.StringWriter, entry page.Ent
 		out.WriteString("\n\n")
 	}
 
+	if entry.ExampleVideoURL != "" {
+		Video{VideoURL: entry.ExampleVideoURL}.RenderTo(out)
+		out.WriteString("\n\n")
+	}
+
 	if len(entry.Requirements) > 0 {
 		out.WriteString(config.Requirements.Title)
 		out.WriteString("\n")
